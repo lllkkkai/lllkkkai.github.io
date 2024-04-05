@@ -12,7 +12,7 @@ body[a="dark"] { @include dark-appearance; }
 
 @font-face {
   font-family: "Apple";
-  src: url("/assets/apple.ttf");
+  src: url("/assets/css/apple.ttf");
 }
 
 @media (prefers-color-scheme: dark) {
