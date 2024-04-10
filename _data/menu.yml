@@ -35,6 +35,7 @@ entries:
       show_more_url: archive.html
   
   - title: Data Structure
+    post_list:
       category: ds
       show_more: true
       show_more_text: See archive...
