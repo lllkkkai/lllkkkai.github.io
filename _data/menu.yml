@@ -8,7 +8,7 @@ entries:
   - title: Java
     post_list:
       category: Java
-      limit: 5
+      limit: 10
       show_more: true
       show_more_text: See archive...
       show_more_url: archive.html
@@ -19,3 +19,23 @@ entries:
       show_more: true
       show_more_text: See more posts...
       show_more_url: example2-archive.html
+  
+  - title: Design
+    post_list:
+      category: Design
+      show_more: true
+      show_more_text: See archive...
+      show_more_url: archive.html
+
+  - title: Message Queue
+    post_list:
+      category: mq
+      show_more: true
+      show_more_text: See archive...
+      show_more_url: archive.html
+  
+  - title: Data Structure
+      category: ds
+      show_more: true
+      show_more_text: See archive...
+      show_more_url: archive.html
