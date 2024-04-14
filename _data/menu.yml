@@ -40,3 +40,10 @@ entries:
       show_more: true
       show_more_text: See archive...
       show_more_url: archive.html
+
+  - title: Linux 
+    post_list:
+      category: linux
+      show_more: true
+      show_more_text: See archive...
+      show_more_url: archive.html
