@@ -2,13 +2,12 @@
 # https://github.com/riggraz/no-style-please#customize-the-menu
 
 entries:
-  - title: lllkkk.ai的GitHub
+  - title: LLLKKK的GitHub
     url: https://github.com/lllkkkai
 
   - title: Java
     post_list:
       category: Java
-      limit: 10
       show_more: true
       show_more_text: See archive...
       show_more_url: archive.html
@@ -58,6 +57,13 @@ entries:
   - title: RPC 
     post_list:
       category: rpc
+      show_more: true
+      show_more_text: See archive...
+      show_more_url: archive.html
+
+  - title:  Architecture
+    post_list:
+      category: Architecture
       show_more: true
       show_more_text: See archive...
       show_more_url: archive.html
