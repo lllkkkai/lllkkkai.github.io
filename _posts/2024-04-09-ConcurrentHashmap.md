@@ -24,6 +24,11 @@ category: Java
 ![alt text](../assets/img/ConcurrentHashmap8.png)
 
 ## JDK1.8中线程安全的体现
+### get
+ConcurrentHashMap的get方法无锁，通过volatile关键字来保证可见性，避免脏数据
+
+get方法的实现主要是通过volatile关键字和Unsafe类来保证的。在ConcurrentHashMap中，Node数组和Node节点的value字段都是用volatile关键字修饰的，这可以保证线程间的可见性，也就是说，当一个线程修改了数据，其他线程可以立即看到修改后的值。另外，Unsafe类提供了一种低级别的、直接操作内存的方式，可以用来实现无锁的并发操作。
+### put
 ConcurrentHashMap 使用的是 CAS + volatile 或 synchronized 的方式来保证线程安全的：
 ```Java
     final V putVal(K key, V value, boolean onlyIfAbsent) { 
@@ -73,3 +78,5 @@ ConcurrentHashMap 使用的是 CAS + volatile 或 synchronized 的方式来保�
 如果不为空则使用 synchronize 加锁，遍历桶中的数据，替换或新增节点到桶中，最后再判断是否需要转为红黑树，这样就能保证并发访问时的线程安全了。
 
 我们把上述流程简化一下，我们可以简单的认为在 JDK 1.8 中，ConcurrentHashMap 是在头节点加锁来保证线程安全的，锁的粒度相比 Segment 来说更小了，发生冲突和加锁的频率降低了，并发操作的性能就提高了。而且 JDK 1.8 使用的是红黑树优化了之前的固定链表，那么当数据量比较大的时候，查询性能也得到了很大的提升，从之前的 O(n) 优化到了 O(logn) 的时间复杂度。
+
+### 扩容
