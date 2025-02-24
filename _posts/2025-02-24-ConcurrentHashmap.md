@@ -3,6 +3,142 @@ layout: post
 category: Java
 ---
 
+## ConcurrentHashMap
+诞生的背景：多线程环境下，使用HashMap不安全，使用Hashtable有性能问题；
+
+**1. **Hashtable** 的性能瓶颈
+Hashtable 是 Java 早期提供的线程安全哈希表，它通过在所有方法上加锁（synchronized）来实现线程安全。这种方式存在以下问题：
+
+粗粒度锁：Hashtable 使用单一的全局锁，所有操作都需要竞争锁，导致并发性能差。
+高竞争：在多线程环境下，锁竞争会显著降低性能。 ConcurrentHashMap 通过更细粒度的锁机制解决了这些问题。
+
+源码分析
+```Java
+// 内部采用Entry数组存储键值对数据，Entry实际为单向链表的表头
+private transient Entry<?,?>[] table;
+// HashTable里键值对个数
+private transient int count;
+// 扩容阈值，当超过这个值时，进行扩容操作，计算方式为：数组容量*加载因子
+private int threshold;
+// 加载因子
+private float loadFactor;
+// 用于快速失败
+private transient int modCount = 0;
+
+// 方法synchronized修饰，线程安全，多线程共享一个hashtable对象时，同一时刻只有一个线程能读取和修改Hashtable
+public synchronized V put(K key, V value) {
+    // Make sure the value is not null
+    if (value == null) {
+        throw new NullPointerException();
+    }
+
+    // Makes sure the key is not already in the hashtable.
+    Entry<?,?> tab[] = table;
+    // 得到key的哈希值
+    int hash = key.hashCode();
+    // 得到该key存在到数组中的下标
+    int index = (hash & 0x7FFFFFFF) % tab.length;
+    @SuppressWarnings("unchecked")
+    // 得到该下标对应的Entry
+    Entry<K,V> entry = (Entry<K,V>)tab[index];
+    // 如果该下标的Entry不为null，则进行链表遍历
+    for(; entry != null ; entry = entry.next) {
+        // 遍历链表，如果存在key相等的节点，则替换这个节点的值，并返回旧值
+        if ((entry.hash == hash) && entry.key.equals(key)) {
+            V old = entry.value;
+            entry.value = value;
+            return old;
+        }
+    }
+    // 如果数组下标对应的节点为空，或者遍历链表后发现没有和该key相等的节点，则执行插入操作
+    addEntry(hash, key, value, index);
+    return null;
+}
+
+private void addEntry(int hash, K key, V value, int index) {
+    // 模数+1
+    modCount++;
+
+    Entry<?,?> tab[] = table;
+    // 判断是否需要扩容
+    if (count >= threshold) {
+        // 如果count大于等于扩容阈值，则进行扩容
+        rehash();
+
+        tab = table;
+        // 扩容后，重新计算该key在扩容后table里的下标
+        hash = key.hashCode();
+        index = (hash & 0x7FFFFFFF) % tab.length;
+    }
+
+    // Creates the new entry.
+    @SuppressWarnings("unchecked")
+    // 采用头插的方式插入，index位置的节点为新节点的next节点
+    // 新节点取代inde位置节点
+    Entry<K,V> e = (Entry<K,V>) tab[index];
+    tab[index] = new Entry<>(hash, key, value, e);
+    // count+1
+    count++;
+}
+
+public synchronized V get(Object key) {
+    Entry<?,?> tab[] = table;
+    int hash = key.hashCode();
+    // 根据key哈希得到index，遍历链表取值
+    int index = (hash & 0x7FFFFFFF) % tab.length;
+    for (Entry<?,?> e = tab[index] ; e != null ; e = e.next) {
+        if ((e.hash == hash) && e.key.equals(key)) {
+            return (V)e.value;
+        }
+    }
+    return null;
+}
+
+protected void rehash() {
+    // 暂存旧的table和容量
+    int oldCapacity = table.length;
+    Entry<?,?>[] oldMap = table;
+
+    // 新容量为旧容量的2n+1倍
+    int newCapacity = (oldCapacity << 1) + 1;
+    // 判断新容量是否超过最大容量
+    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+        // 如果旧容量已经是最大容量大话，就不扩容了
+        if (oldCapacity == MAX_ARRAY_SIZE)
+            // Keep running with MAX_ARRAY_SIZE buckets
+            return;
+        // 新容量最大值只能是MAX_ARRAY_SIZE
+        newCapacity = MAX_ARRAY_SIZE;
+    }
+    // 用新容量创建一个新Entry数组
+    Entry<?,?>[] newMap = new Entry<?,?>[newCapacity];
+    // 模数+1
+    modCount++;
+    // 重新计算下次扩容阈值
+    threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
+    // 将新Entry数组赋值给table
+    table = newMap;
+    // 遍历数组和链表，进行新table赋值操作
+    for (int i = oldCapacity ; i-- > 0 ;) {
+        for (Entry<K,V> old = (Entry<K,V>)oldMap[i] ; old != null ; ) {
+            Entry<K,V> e = old;
+            old = old.next;
+
+            int index = (e.hash & 0x7FFFFFFF) % newCapacity;
+            e.next = (Entry<K,V>)newMap[index];
+            newMap[index] = e;
+        }
+    }
+}
+```
+
+**2. **HashMap** 的非线程安全
+HashMap 是非线程安全的，在多线程环境下可能出现以下问题：
+
+数据不一致：多线程同时修改 HashMap 可能导致内部结构破坏。
+死循环：在扩容时，多线程可能引发死循环（JDK 1.7 中的经典问题）。 ConcurrentHashMap 提供了线程安全的实现，避免了这些问题。
+
+
 ## 线程安全的Map
 在多线程环境下，Java 提供了几种线程安全的 Map 实现，可以安全地进行并发操作：
 1. ConcurrentHashMap: 这是一个线程安全的哈希表实现，它通过将数据分为多个段，每个段都有自己的锁，从而允许多个线程同时访问不同段的数据。在 Java 8 中，ConcurrentHashMap 还引入了红黑树来处理哈希冲突严重的情况，进一步提高了查找效率。
