@@ -205,7 +205,7 @@ static final <K,V> Node<K,V> tabAt(Node<K,V>[] tab, int i) {
 
 - **红黑树节点（`TreeNode`）**：当桶中的元素以红黑树形式存储时，`get` 方法会调用 `TreeNode` 的 `find` 方法进行查找。红黑树本身是一种自平衡的二叉搜索树，并且在 `ConcurrentHashMap` 中对红黑树的操作进行了并发控制，保证在多线程环境下查找操作的正确性。
 - **转发节点（`ForwardingNode`）**：在扩容过程中，某些桶会被标记为 `ForwardingNode`。当 `get` 方法遇到 `ForwardingNode` 时，会根据 `ForwardingNode` 提供的信息，到新的数组中继续查找元素。由于扩容操作是有组织地进行的，并且 `ForwardingNode` 本身也是线程安全的，所以不会影响 `get` 操作的正确性。
-
+·····························
 #### 3. 无锁设计
 `get` 方法在整个执行过程中不需要加锁。这是因为 `ConcurrentHashMap` 的设计理念是尽量减少锁的使用，以提高并发性能。在 `get` 操作中，通过原子操作和对不同节点类型的正确处理，避免了线程之间的竞争和冲突，从而在不使用锁的情况下保证了线程安全。
 
