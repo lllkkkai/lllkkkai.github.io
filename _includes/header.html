@@ -18,6 +18,7 @@
         {%- if site.search.provider -%}
           <button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
         {%- endif -%}
+        <button class="button button--secondary button--circle theme-toggle-btn js-theme-toggle" title="切换深色/浅色模式" aria-label="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
       </div>
       {%- if site.data.navigation.header -%}
       <nav class="navigation">
@@ -37,6 +38,7 @@
           {%- if site.search.provider -%}
             <li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li>
           {%- endif -%}
+          <li><button class="button button--secondary button--circle theme-toggle-btn js-theme-toggle" title="切换深色/浅色模式" aria-label="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button></li>
         </ul>
       </nav>
       {%- endif -%}
